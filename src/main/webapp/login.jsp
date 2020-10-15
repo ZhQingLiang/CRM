@@ -35,6 +35,10 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 			})
 		})
+
+		// function login 如果动态样式，动态元素多了，
+		// 必须写在$function外面
+		//普通的自定义的function方法，一定要写在$(function(){})的外面
 		function login() {
 			// 两种trim方式
 			var userName = $.trim($("#loginAct").val())

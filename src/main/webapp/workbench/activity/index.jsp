@@ -23,6 +23,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 <script type="text/javascript">
 
 	$(function(){
+		pageList(1,2);
 		$("#addBtn").click(function () {
 			// alert("123")
 			$("#createActivityModal").modal("show")
@@ -84,20 +85,50 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 					if(result.success){
 						alert("添加成功")
-						$("#addActivitiForm")[0].reset();
+						$(" #addActivitiForm")[0].reset();
 						$("#createActivityModal").modal("hide")
 					}else{
 						alert("添加失败")
 					}
 				}
-
 			})
 
 		})
 		// $.ajax()
 
-
 	})
+	function pageList(pageNo,pageSize) {
+		$.ajax({
+			url:"workbench/activity/pageList.do",
+			data:{
+				"pageNo":pageNo,
+				"pageSize":pageSize,
+				"name":$.trim($("#search-name").val()),
+				"owner":$.trim($("#search-owner").val()),
+				"startDate":$.trim($("#search-startDate").val()),
+				"endDate":$.trim($("#search-endDate").val()),
+			},
+			dataType:"json",
+			type:"get",
+			success:function (result) {
+				var html = "";
+
+				// n为result.dataList的一条记录，不是result的一条记录
+				$.each(result.dataList,function (i,n) {
+					   html += '<tr class="active"> '
+                       html += '<td><input type="checkbox" id="'+n.id+'"></td>'
+                       html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.jsp\';">'+n.name+'</a></td>'
+					   html += '<td>'+n.owner+'</td>'
+					   html += '<td>'+n.startDate+'</td>'
+					   html += '<td>'+n.endDate+'</td>'
+					   html += '</tr>'
+				})
+                $("#activeBody").html(html);
+
+			}
+		})
+
+	}
 
 </script>
 </head>
@@ -114,9 +145,9 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					<h4 class="modal-title" id="myModalLabel1">创建市场活动</h4>
 				</div>
 				<div class="modal-body">
-				
+
 					<form id="addActivitiForm" class="form-horizontal" role="form">
-					
+
 						<div class="form-group">
 							<label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
@@ -129,7 +160,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
                                 <input type="text" class="form-control" id="createActivityName">
                             </div>
 						</div>
-						
+
 						<div class="form-group">
 							<label for="create-startTime" class="col-sm-2 control-label">开始日期</label>
 							<div class="col-sm-10" style="width: 300px;">
@@ -153,9 +184,9 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 								<textarea class="form-control" rows="3" id="create-describe"></textarea>
 							</div>
 						</div>
-						
+
 					</form>
-					
+
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -164,7 +195,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			</div>
 		</div>
 	</div>
-	
+
 	<!-- 修改市场活动的模态窗口 -->
 	<div class="modal fade" id="editActivityModal" role="dialog">
 		<div class="modal-dialog" role="document" style="width: 85%;">
@@ -176,9 +207,9 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					<h4 class="modal-title" id="myModalLabel2">修改市场活动</h4>
 				</div>
 				<div class="modal-body">
-				
+
 					<form class="form-horizontal" role="form">
-					
+
 						<div class="form-group">
 							<label for="edit-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
@@ -204,23 +235,23 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 								<input type="text" class="form-control" id="edit-endTime" value="2020-10-20">
 							</div>
 						</div>
-						
+
 						<div class="form-group">
 							<label for="edit-cost" class="col-sm-2 control-label">成本</label>
 							<div class="col-sm-10" style="width: 300px;">
 								<input type="text" class="form-control" id="edit-cost" value="5,000">
 							</div>
 						</div>
-						
+
 						<div class="form-group">
 							<label for="edit-describe" class="col-sm-2 control-label">描述</label>
 							<div class="col-sm-10" style="width: 81%;">
 								<textarea class="form-control" rows="3" id="edit-describe">市场活动Marketing，是指品牌主办或参与的展览会议与公关市场活动，包括自行主办的各类研讨会、客户交流会、演示会、新产品发布会、体验会、答谢会、年会和出席参加并布展或演讲的展览会、研讨会、行业交流会、颁奖典礼等</textarea>
 							</div>
 						</div>
-						
+
 					</form>
-					
+
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" id="" data-dismiss="modal">关闭</button>
@@ -229,10 +260,10 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			</div>
 		</div>
 	</div>
-	
-	
-	
-	
+
+
+
+
 	<div>
 		<div style="position: relative; left: 10px; top: -10px;">
 			<div class="page-header">
@@ -242,21 +273,21 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 	</div>
 	<div style="position: relative; top: -20px; left: 0px; width: 100%; height: 100%;">
 		<div style="width: 100%; position: absolute;top: 5px; left: 10px;">
-		
+
 			<div class="btn-toolbar" role="toolbar" style="height: 80px;">
 				<form class="form-inline" role="form" style="position: relative;top: 8%; left: 5px;">
-				  
+
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">名称</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="search-name">
 				    </div>
 				  </div>
-				  
+
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">所有者</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="search-owner">
 				    </div>
 				  </div>
 
@@ -264,18 +295,18 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">开始日期</div>
-					  <input class="form-control" type="text" id="startTime" />
+					  <input class="form-control" type="text" id="startTime" id="search-startDate">
 				    </div>
 				  </div>
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">结束日期</div>
-					  <input class="form-control" type="text" id="endTime">
+					  <input class="form-control" type="text" id="endTime" id="search-endDate">
 				    </div>
 				  </div>
-				  
+
 				  <button type="submit" class="btn btn-default">查询</button>
-				  
+
 				</form>
 			</div>
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
@@ -284,7 +315,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				  <button type="button" class="btn btn-default" ><span class="glyphicon glyphicon-pencil"></span> 修改</button>
 				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
-				
+
 			</div>
 			<div style="position: relative;top: 10px;">
 				<table class="table table-hover">
@@ -297,25 +328,25 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 							<td>结束日期</td>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="active">
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>
-                            <td>zhangsan</td>
-							<td>2020-10-10</td>
-							<td>2020-10-20</td>
-						</tr>
-                        <tr class="active">
-                            <td><input type="checkbox" /></td>
-                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>
-                            <td>zhangsan</td>
-                            <td>2020-10-10</td>
-                            <td>2020-10-20</td>
-                        </tr>
+					<tbody id="activeBody">
+<%--						<tr class="active">--%>
+<%--							<td><input type="checkbox" /></td>--%>
+<%--							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>--%>
+<%--                            <td>zhangsan</td>--%>
+<%--							<td>2020-10-10</td>--%>
+<%--							<td>2020-10-20</td>--%>
+<%--						</tr>--%>
+<%--                        <tr class="active">--%>
+<%--                            <td><input type="checkbox" /></td>--%>
+<%--                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>--%>
+<%--                            <td>zhangsan</td>--%>
+<%--                            <td>2020-10-10</td>--%>
+<%--                            <td>2020-10-20</td>--%>
+<%--                        </tr>--%>
 					</tbody>
 				</table>
 			</div>
-			
+
 			<div style="height: 50px; position: relative;top: 30px;">
 				<div>
 					<button type="button" class="btn btn-default" style="cursor: default;">共<b>50</b>条记录</button>
@@ -350,9 +381,9 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					</nav>
 				</div>
 			</div>
-			
+
 		</div>
-		
+
 	</div>
 </body>
 </html>
