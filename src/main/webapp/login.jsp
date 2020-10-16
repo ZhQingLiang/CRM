@@ -67,11 +67,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						$("#msg").html(result.msg)
 					}
 				}
-
-
 			})
-
-
 		}
 
 

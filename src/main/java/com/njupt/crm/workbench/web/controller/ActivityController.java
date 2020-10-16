@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.Service;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,21 @@ public class ActivityController extends HttpServlet {
             saveActivity(request, response);
         } else if ("/workbench/activity/pageList.do".equals(path)) {
             pageList(request, response);
+        }else if ("/workbench/activity/delete.do".equals(path)) {
+            delete(request, response);
         }
 
+    }
+
+    private void delete(HttpServletRequest request, HttpServletResponse response) {
+//        适用于名称不同的情况，eg：id=?&name=?
+//        Enumeration enumeration = request.getParameterNames();
+//        while ((enumeration.hasMoreElements())){
+//        }
+        String[] ids = request.getParameterValues("id");
+        ActivityService activityService = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = activityService.delete(ids);
+        PrintJson.printJsonFlag(response,flag);
     }
 
     private void pageList(HttpServletRequest request, HttpServletResponse response) {

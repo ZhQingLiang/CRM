@@ -29,8 +29,8 @@ public class Activity {
         return owner;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
+    public void setOwner(String owner1) {
+        this.owner = owner1;
     }
 
     public String getName() {
