@@ -9,6 +9,7 @@ import com.njupt.crm.utils.ServiceFactory;
 import com.njupt.crm.utils.UUIDUtil;
 import com.njupt.crm.vo.PaginationVO;
 import com.njupt.crm.workbench.domain.Activity;
+import com.njupt.crm.workbench.domain.ActivityRemark;
 import com.njupt.crm.workbench.service.ActivityService;
 import com.njupt.crm.workbench.service.impl.ActivityServiceImpl;
 
@@ -35,8 +36,75 @@ public class ActivityController extends HttpServlet {
             pageList(request, response);
         }else if ("/workbench/activity/delete.do".equals(path)) {
             delete(request, response);
+        }else if ("/workbench/activity/getEditList.do".equals(path)) {
+            editList(request, response);
+        }else if ("/workbench/activity/update.do".equals(path)) {
+            update(request, response);
+        }else if ("/workbench/activity/detail.do".equals(path)) {
+            detail(request, response);
+        }else if ("/workbench/activity/showRemark.do".equals(path)) {
+            showRemark(request, response);
+        }else if ("/workbench/activity/deleteRemark.do".equals(path)) {
+            deleteRemark(request, response);
         }
 
+    }
+
+    private void deleteRemark(HttpServletRequest request, HttpServletResponse response) {
+        String id = request.getParameter("id");
+        ActivityService activityService = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = activityService.deleteRemark(id);
+        PrintJson.printJsonFlag(response,flag);
+    }
+
+    private void showRemark(HttpServletRequest request, HttpServletResponse response) {
+        String id = request.getParameter("id");
+        ActivityService activityService = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        ActivityRemark[] activityRemark = activityService.showRemark(id);
+        PrintJson.printJsonObj(response,activityRemark);
+    }
+
+    private void detail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String id = request.getParameter("id");
+        ActivityService activityService = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        Activity activity = activityService.detail(id);
+        request.setAttribute("activity",activity);
+        request.getRequestDispatcher("/workbench/activity/detail.jsp").forward(request,response);
+
+    }
+
+    private void update(HttpServletRequest request, HttpServletResponse response) {
+        ActivityService activityService = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        String id = request.getParameter("id");
+        String owner = request.getParameter("owner");
+        String name = request.getParameter("name");
+        String startTime = request.getParameter("startTime");
+        String endTime = request.getParameter("endTime");
+        String describe = request.getParameter("describe");
+        String cost = request.getParameter("cost");
+        String editTime = DateTimeUtil.getSysTime();
+        String editBy = ((User)request.getSession().getAttribute("user")).getName();
+
+        Activity activity = new Activity();
+        activity.setId(id);
+        activity.setOwner(owner);
+        activity.setName(name);
+        activity.setStartDate(startTime);
+        activity.setEndDate(endTime);
+        activity.setDescription(describe);
+        activity.setCost(cost);
+        activity.setEditTime(editTime);
+        activity.setEditBy(editBy);
+        boolean flag = activityService.update(activity);
+        PrintJson.printJsonFlag(response,flag);
+    }
+
+    private void editList(HttpServletRequest request, HttpServletResponse response) {
+        ActivityService activityService = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        String id = request.getParameter("id");
+        Map<String,Object> map= activityService.editList(id);
+        PrintJson.printJsonObj(response,map);
     }
 
     private void delete(HttpServletRequest request, HttpServletResponse response) {

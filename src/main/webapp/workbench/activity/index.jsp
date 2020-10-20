@@ -28,7 +28,8 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 <script type="text/javascript">
 
 	$(function(){
-		pageList(1,2);
+		// 不能用 $("#activityPage").bs_pagination('getOption',rowsPerPage)
+		pageList(1,5);
 		$("#addBtn").click(function () {
 			// alert("123")
 			$("#createActivityModal").modal("show")
@@ -92,8 +93,91 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						alert("添加成功")
 						$(" #addActivitiForm")[0].reset();
 						$("#createActivityModal").modal("hide")
+
+						// pageList()放在这里，放在ajax之外，可能失败
+						pageList(1,$("#activityPage").bs_pagination('getOption',rowsPerPage))
 					}else{
 						alert("添加失败")
+					}
+				}
+			})
+
+		})
+
+		$("#editBtn").click(function () {
+			var count = $("input[name=xuanze]:checked").length
+			$(".time").datetimepicker({
+				minView: "month",
+				language:  'zh-CN',
+				format: 'yyyy-mm-dd',
+				autoclose: true,
+				todayBtn: true,
+				pickerPosition: "bottom-left"
+			});
+			if(count==1){
+
+				$.ajax({
+					url:"workbench/activity/getEditList.do",
+					// $("input[name=xuanze]:checked").val()
+					data:{"id": $("input[name=xuanze]:checked").val()},
+					type:"get",
+					dataType:"json",
+					success:function (result) {
+						var list = ""
+						$.each(result.owners,function (i,n) {
+							// 字符串拼接！！
+							list += "<option value='"+n.id+"'>"+n.name+"</option>"
+						})
+						$("#edit-marketActivityOwner").html(list)
+
+						$("#hidden-id").val(result.activity.id)
+						$("#edit-marketActivityName").val(result.activity.name)
+						$("#edit-startTime").val(result.activity.startDate)
+						$("#edit-endTime").val(result.activity.endDate)
+						$("#edit-describe").val(result.activity.description)
+						$("#edit-cost").val(result.activity.cost)
+
+						// activity中的owner就是user中的id！！注意外键关联
+						$("#edit-marketActivityOwner").val(result.activity.owner);
+
+
+					}
+				})
+
+				$("#editActivityModal").modal("show")
+
+
+			}else if(count<1){
+				alert("请选择需要修改的项")
+			}else {
+				alert("选择修改的项过多")
+			}
+		})
+
+		$("#updateBtn").click(function () {
+			$.ajax({
+				url:"workbench/activity/update.do",
+				data:{
+					// 设置隐藏域id
+					"id":$.trim($("#hidden-id").val()),
+					"owner":$.trim($("#edit-marketActivityOwner").val()),
+					"name":$.trim($("#edit-marketActivityName").val()),
+					"startTime":$.trim($("#edit-startTime").val()),
+					"endTime":$.trim($("#edit-endTime").val()),
+					"describe":$.trim($("#edit-describe").val()),
+					"cost":$.trim($("#edit-cost").val()),
+
+				},
+				type:"post",
+				dataType:"json",
+				success:function (result) {
+					if(result.success){
+						alert("修改成功")
+						pageList($("#activityPage").bs_pagination('getOption',currentPage),
+								$("#activityPage").bs_pagination('getOption',rowsPerPage))
+					}else {
+						alert("修改失败")
+						alert($.trim($("#edit-id").val()))
 					}
 				}
 			})
@@ -105,6 +189,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			if(count==0){
 				alert("请勾选需要删除的项")
 			}else {
+				// 删除多条
 				var param = ""
 				for(var i=0;i<count;i++){
 					param += "id=" + $("input[name=xuanze]:checked")[i].value;
@@ -122,7 +207,8 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						success:function (result) {
 							if(result.success){
 								alert("删除成功")
-								pageList(1,2)
+
+								pageList(1,$("#activityPage").bs_pagination('getOption',rowsPerPage))
 							}else {
 								alert("删除失败")
 							}
@@ -131,7 +217,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				}
 
 			}
-
+			$("#sellectAll").prop("checked",false)
 
 		})
 		// $.ajax()
@@ -148,7 +234,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			$("#hidden-startDate").val($.trim($("#search-startDate").val()));
 			$("#hidden-endDate").val($.trim($("#search-endDate").val()));
 
-			pageList(1,2);
+			pageList(1,5);
 
 		})
 		$("#sellectAll").click(function () {
@@ -209,7 +295,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					   html += '<tr class="active"> '
 						// class主要用来描述样式，id不能重复，所以用name
                        html += '<td><input type="checkbox" name="xuanze" value="'+n.id+'"></td>'
-                       html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.jsp\';">'+n.name+'</a></td>'
+                       html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.do?id='+n.id+'\';">'+n.name+'</a></td>'
 					   html += '<td>'+n.owner+'</td>'
 					   html += '<td>'+n.startDate+'</td>'
 					   html += '<td>'+n.endDate+'</td>'
@@ -318,7 +404,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 	</div>
 
 	<!-- 修改市场活动的模态窗口 -->
-	<div class="modal fade" id="editActivityModal" role="dialog">
+	<div class="modal fade" id="editActivityModal" id="editActivityModal" role="dialog">
 		<div class="modal-dialog" role="document" style="width: 85%;">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -330,14 +416,14 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				<div class="modal-body">
 
 					<form class="form-horizontal" role="form">
-
+						<input type="hidden" id="hidden-id"/>
 						<div class="form-group">
 							<label for="edit-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="edit-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
+<%--								  <option>zhangsan</option>--%>
+<%--								  <option>lisi</option>--%>
+<%--								  <option>wangwu</option>--%>
 								</select>
 							</div>
                             <label for="edit-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
@@ -349,11 +435,11 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						<div class="form-group">
 							<label for="edit-startTime" class="col-sm-2 control-label">开始日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-startTime" value="2020-10-10">
+								<input type="text" class="form-control time" id="edit-startTime" value="2020-10-10">
 							</div>
 							<label for="edit-endTime" class="col-sm-2 control-label">结束日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="edit-endTime" value="2020-10-20">
+								<input type="text" class="form-control time" id="edit-endTime" value="2020-10-20">
 							</div>
 						</div>
 
@@ -375,8 +461,8 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default" id="" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" id="" data-dismiss="modal">更新</button>
+					<button type="button" class="btn btn-default"  data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="updateBtn" data-dismiss="modal">更新</button>
 				</div>
 			</div>
 		</div>
@@ -433,8 +519,8 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
 				<div class="btn-group" style="position: relative; top: 18%;">
 				  <button type="button" class="btn btn-primary" id="addBtn"><span class="glyphicon glyphicon-plus"></span> 创建</button>
-				  <button type="button" class="btn btn-default" ><span class="glyphicon glyphicon-pencil"></span> 修改</button>
-				  <button type="button" id="deleteBtn" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				  <button type="button" class="btn btn-default" id="editBtn" ><span class="glyphicon glyphicon-pencil"></span> 修改</button>
+				  <button type="button" class="btn btn-danger" id="deleteBtn"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
 
 			</div>

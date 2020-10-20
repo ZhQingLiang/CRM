@@ -58,7 +58,5 @@ public class UserController extends HttpServlet {
             map.put("msg",msg);
             PrintJson.printJsonObj(response,map);
         }
-
-
     }
 }
