@@ -13,9 +13,7 @@
         where activityId in
 
         <foreach collection="array" item="aid" open="(" close=")" separator=",">
-
             #{aid}
-
         </foreach>
 
 
@@ -44,6 +42,37 @@
     <delete id="deleteRemark">
         delete from tbl_activity_remark where id=#{id}
     </delete>
+
+    <insert id="saveRemark">
+        insert into tbl_activity_remark(
+            id,
+            noteContent,
+            createTime,
+            createBy,
+            editTime,
+            editBy,
+            editFlag,
+            activityId
+        )values (
+            #{id},
+            #{noteContent},
+            #{createTime},
+            #{createBy},
+            #{editTime},
+            #{editBy},
+            #{editFlag},
+            #{activityId}
+        )
+    </insert>
+
+    <update id="editRemark">
+        update tbl_activity_remark set
+            noteContent=#{noteContent},
+            editTime=#{editTime},
+            editBy=#{editBy},
+            editFlag=#{editFlag}
+        where id=#{id}
+    </update>
 	
 </mapper>
 

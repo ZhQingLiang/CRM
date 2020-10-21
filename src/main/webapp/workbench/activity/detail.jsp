@@ -59,9 +59,75 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			$(this).children("div").children("div").hide();
 		})
 
+		$("#saveRemarkBtn").click(function () {
+			$.ajax({
+				url:"workbench/activity/saveRemark.do",
+				data:{
+					"noteContent":$.trim($("#remark").val()),
+					"activityId":"${activity.id}"
+				},
+				dataType:"json",
+				type:"post",
+				success:function (result) {
+					if(result.success){
+						alert("添加备注成功")
+						var html = ""
+
+						// 拼接元素要写对，否则不报错，程序不执行
+						html += '<div class="remarkDiv" id="'+result.activityRemark.id+'" style="height: 60px;">'
+						html += '	<img title="zhangsan" src="image/user-thumbnail.png" style="width: 30px; height:30px;">'
+						html += '	<div style="position: relative; top: -40px; left: 40px;" >'
+						html += '		<h5>'+result.activityRemark.noteContent+'</h5>'
+						html += '		<font color="gray">市场活动</font> <font color="gray">-</font> <b>${activity.name}</b> <small style="color: gray;"> '+(result.activityRemark.createTime)+' 由'+(result.activityRemark.createBy)+'</small>'
+						html += '		<div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">'
+						html += '			<a class="myHref" onclick="editRemark(\''+result.activityRemark.id+'\')" href="javascript:void(0);"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #FF0000;"></span></a>'
+						html += '			&nbsp;&nbsp;&nbsp;&nbsp;'
+						//动态生成元素触发的方法必须将参数写在字符串中
+						html += '			<a class="myHref" onclick="deleteRemark(\''+result.activityRemark.id+'\')" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #FF0000;"></span></a>'
+						html += '		</div>'
+						html += '	</div>'
+						html += '</div>'
+
+						$("#remarkDiv").before(html)
+						$("#remark").val("")
+					}else {
+						alert("添加备注失败")
+						$("#remark").val("")
+
+					}
+				}
+			})
+		})
+		$("#updateRemarkBtn").click(function () {
+			var id=$("#hiddenRemarkId").val()
+			$.ajax({
+				url: "workbench/activity/editRemark.do",
+				data: {
+					"id": id,
+					"noteContent":$.trim($("#noteContent").val())
+				},
+				dataType: "json",
+				type: "post",
+				success: function (result) {
+					if (result.success) {
+						alert("编辑成功")
+						$("#editRemarkModal").modal("hide")
+
+						// 标签对，此处要使用HTML
+						$("#note"+id).html(result.activityRemark.noteContent)
+						$("#time"+id).html(result.activityRemark.editTime+' 由'+result.activityRemark.editBy)
+					} else {
+						alert("编辑失败")
+					}
+
+				}
+			})
+		})
+
 		showRemark()
 	});
 	function showRemark() {
+
 		$.ajax({
 			url:"workbench/activity/showRemark.do",
 			data:{"id":"${activity.id}"},
@@ -73,10 +139,10 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					html += '<div class="remarkDiv" id="'+n.id+'" style="height: 60px;">'
 					html += '	<img title="zhangsan" src="image/user-thumbnail.png" style="width: 30px; height:30px;">'
 					html += '	<div style="position: relative; top: -40px; left: 40px;" >'
-					html += '		<h5>'+n.noteContent+'</h5>'
-					html += '		<font color="gray">市场活动</font> <font color="gray">-</font> <b>${activity.name}</b> <small style="color: gray;"> '+(n.editFlag==0?n.createTime:n.editTime)+' 由'+(n.editFlag==1?n.editBy:n.createBy)+'</small>'
+					html += '		<h5 id="note'+n.id+'">'+n.noteContent+'</h5>'
+					html += '		<font color="gray">市场活动</font> <font color="gray">-</font> <b>${activity.name}</b> <small id="time'+n.id+'" style="color: gray;"> '+(n.editFlag==0?n.createTime:n.editTime)+' 由'+(n.editFlag==1?n.editBy:n.createBy)+'</small>'
 					html += '		<div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">'
-					html += '			<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #FF0000;"></span></a>'
+					html += '			<a class="myHref" onclick="editRemark(\''+n.id+'\')" href="javascript:void(0);"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #FF0000;"></span></a>'
 					html += '			&nbsp;&nbsp;&nbsp;&nbsp;'
 												//动态生成元素触发的方法必须将参数写在字符串中
 					html += '			<a class="myHref" onclick="deleteRemark(\''+n.id+'\')" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #FF0000;"></span></a>'
@@ -88,7 +154,6 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				$("#remarkDiv").before(html)
 			}
 		})
-
 	}
 	function deleteRemark(id){
 		$.ajax({
@@ -97,18 +162,22 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			dataType: "json",
 			type: "post",
 			success:function (result) {
-				if(result.success){
-					alert("删除成功")
-
-					$("#"+id).remove()
-				}else {
-					alert("删除失败")
+				if(confirm("确认删除？")){
+					if(result.success){
+						alert("删除成功")
+						$("#"+id).remove()
+					}else {
+						alert("删除失败")
+					}
 				}
-
 			}
 		})
 	}
-	
+	function editRemark(id) {
+		$("#editRemarkModal").modal("show")
+		$("#hiddenRemarkId").val(id)
+		$("#noteContent").val($("#note"+id).html())
+	}
 </script>
 
 </head>
@@ -129,6 +198,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
                 <div class="modal-body">
                     <form class="form-horizontal" role="form">
                         <div class="form-group">
+							<input type="hidden" id="hiddenRemarkId">
                             <label for="edit-describe" class="col-sm-2 control-label">内容</label>
                             <div class="col-sm-10" style="width: 81%;">
                                 <textarea class="form-control" rows="3" id="noteContent"></textarea>
@@ -220,8 +290,8 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			<h3>市场活动-${activity.name} <small>${activity.startDate} ~ ${activity.endDate}</small></h3>
 		</div>
 		<div style="position: relative; height: 50px; width: 250px;  top: -72px; left: 700px;">
-			<button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-edit"></span> 编辑</button>
-			<button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+<%--			<button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-edit"></span> 编辑</button>--%>
+<%--			<button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>--%>
 		</div>
 	</div>
 	
@@ -306,10 +376,11 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 		
 		<div id="remarkDiv" style="background-color: #E6E6E6; width: 870px; height: 90px;">
 			<form role="form" style="position: relative;top: 10px; left: 10px;">
-				<textarea id="remark" class="form-control" style="width: 850px; resize : none;" rows="2"  placeholder="添加备注..."></textarea>
+<%--				textarea当做表单因素处理--%>
+				<textarea id="remark" cla  ss="form-control" style="width: 850px; resize : none;" rows="2"  placeholder="添加备注..."></textarea>
 				<p id="cancelAndSaveBtn" style="position: relative;left: 737px; top: 10px; display: none;">
 					<button id="cancelBtn" type="button" class="btn btn-default">取消</button>
-					<button type="button" class="btn btn-primary">保存</button>
+					<button type="button" id="saveRemarkBtn" class="btn btn-primary">保存</button>
 				</p>
 			</form>
 		</div>

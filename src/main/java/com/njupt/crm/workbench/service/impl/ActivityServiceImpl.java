@@ -61,6 +61,7 @@ public class ActivityServiceImpl implements ActivityService {
         Activity activity = activityDao.getActivity(id);
         Map<String,Object> map = new HashMap<String, Object>();
         map.put("owners",list);
+//        ???
         map.put("activity",activity);
         return map;
     }
@@ -92,6 +93,26 @@ public class ActivityServiceImpl implements ActivityService {
     public boolean deleteRemark(String id) {
         boolean flag = false;
         int count = activityRemarkDao.deleteRemark(id);
+        if(count==1){
+            flag=true;
+        }
+        return flag;
+    }
+
+    @Override
+    public boolean editRemark(ActivityRemark activityRemark) {
+        boolean flag = false;
+        int count = activityRemarkDao.editRemark(activityRemark);
+        if(count==1){
+            flag=true;
+        }
+        return flag;
+    }
+
+    @Override
+    public boolean saveRemark(ActivityRemark activityRemark) {
+        boolean flag = false;
+        int count = activityRemarkDao.saveRemark(activityRemark);
         if(count==1){
             flag=true;
         }

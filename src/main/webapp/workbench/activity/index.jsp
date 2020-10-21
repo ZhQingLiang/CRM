@@ -28,7 +28,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 <script type="text/javascript">
 
 	$(function(){
-		// 不能用 $("#activityPage").bs_pagination('getOption',rowsPerPage)
+		// 不能用 $("#activityPage").bs_pagination('getOption','rowsPerPage')
 		pageList(1,5);
 		$("#addBtn").click(function () {
 			// alert("123")
@@ -95,7 +95,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						$("#createActivityModal").modal("hide")
 
 						// pageList()放在这里，放在ajax之外，可能失败
-						pageList(1,$("#activityPage").bs_pagination('getOption',rowsPerPage))
+						pageList(1,$("#activityPage").bs_pagination('getOption', 'rowsPerPage'))
 					}else{
 						alert("添加失败")
 					}
@@ -173,8 +173,8 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				success:function (result) {
 					if(result.success){
 						alert("修改成功")
-						pageList($("#activityPage").bs_pagination('getOption',currentPage),
-								$("#activityPage").bs_pagination('getOption',rowsPerPage))
+						pageList($("#activityPage").bs_pagination('getOption','currentPage'),
+								$("#activityPage").bs_pagination('getOption','rowsPerPage'))
 					}else {
 						alert("修改失败")
 						alert($.trim($("#edit-id").val()))
@@ -208,7 +208,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 							if(result.success){
 								alert("删除成功")
 
-								pageList(1,$("#activityPage").bs_pagination('getOption',rowsPerPage))
+								pageList(1,$("#activityPage").bs_pagination('getOption','rowsPerPage'))
 							}else {
 								alert("删除失败")
 							}
@@ -266,7 +266,6 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 	// 首先分析需要用到该函数的地方，共有6处
 	function pageList(pageNo,pageSize) {
-
 		//查询前，将隐藏域中保存的信息取出来，重新赋予到搜索框中
 		$("#search-name").val($.trim($("#hidden-name").val()));
 		$("#search-owner").val($.trim($("#hidden-owner").val()));
@@ -555,8 +554,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			</div>
 
 			<div style="height: 50px; position: relative;top: 30px;">
-
-
+<%--				分页id--%>
 				<div id="activityPage"></div>
 			</div>
 
